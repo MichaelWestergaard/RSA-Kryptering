@@ -10,6 +10,14 @@ namespace RSA_Kryptering
     {
         static void Main(string[] args)
         {
+            Console.Write("Skriv en tekst der skal krypteres: ");
+            string secretText = Console.ReadLine();
+
+        }
+
+        static void encrypt(string secretText)
+        {
+
         }
     }
 }
