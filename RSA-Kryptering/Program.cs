@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace RSA_Kryptering
 {
@@ -18,24 +19,33 @@ namespace RSA_Kryptering
         static int d;
 
         public static string convertedText;
-        public static string[] convertedTextBlocks = new string[] { };
+        public static string convertedTextBackwards;
+        public static string cipherText;
+        public static string[] cipherChars;
+        public static List<BigInteger> cipherBlocks = new List<BigInteger>();
+        public static string[] convertedTextBlocks = new string[3];
+        public static BigInteger[] convertedTextBackwardsBlocks = new BigInteger[3];
 
         static void Main(string[] args)
         {
             Console.Write("Skriv en tekst der skal krypteres: ");
-            string secretText = Console.ReadLine();
+            string clearText = Console.ReadLine();
 
-            encrypt(secretText);
+            encrypt(clearText);
 
             Console.WriteLine("N = " + n);
             Console.WriteLine("Phi = " + phi);
             Console.WriteLine("E = " + e);
             Console.WriteLine("d = " + d);
             Console.WriteLine("convertedText = " + convertedText);
+            Console.WriteLine("CipherText = " + cipherText);
+            Console.ReadLine();
+
+            decrypt();
             Console.ReadLine();
         }
 
-        static void encrypt(string secretText)
+        static void encrypt(string clearText)
         {
             //Først sættes de to primtal p og q.
             p = 37;
@@ -54,19 +64,33 @@ namespace RSA_Kryptering
             d = modInv(e,phi);
 
             //Konverter teksten til tal
-            convertToInt(secretText);
-
-            //Separer ind i blokke mindre end n
-            for (int i = 0; i < convertedText.Length-1; i++)
+            convertToInt(clearText);
+            
+            //Sæt ind i blokke
+            for (int i = 0; i < convertedText.Length/3; i++)
             {
                 convertedTextBlocks[i] = convertedText.Substring(i*3,3);
             }
-            convertedTextBlocks[convertedText.Length - 1] = convertedText.Substring(3);
+            convertedTextBlocks[(convertedText.Length/3)] = convertedText.Substring(convertedText.Length-3,3);
+            
+            for (int i = 0; i < convertedTextBlocks.Length; i++) {
+                BigInteger cipherBlock = BigInteger.Pow(BigInteger.Parse(convertedTextBlocks[i]), e) % n;
 
-            for (int i = 0; i< convertedTextBlocks.Length; i++)
-            {
-                Console.WriteLine(convertedTextBlocks[i]);
+                Console.WriteLine(convertedTextBlocks[i] + " = " + cipherBlock);
+                cipherText += cipherBlock;
+                cipherBlocks.Add(cipherBlock);
             }
+
+        }
+
+        static void decrypt()
+        {
+            foreach (var item in cipherBlocks)
+            {
+                convertedTextBackwards += BigInteger.Pow(item, d) % n;
+            }
+            Console.WriteLine(convertedTextBackwards);
+            convertToChar(convertedTextBackwards);
         }
 
         public static int GCD(int a, int b)
@@ -118,9 +142,9 @@ namespace RSA_Kryptering
             return t;
         }
 
-        static void convertToInt(string secretText)
+        static void convertToInt(string clearText)
         {
-            char[] text = secretText.ToArray();
+            char[] text = clearText.ToArray();
             char[] chars = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ".ToArray();
             for (int i = 0; i < text.Length; i++)
             {
@@ -134,6 +158,17 @@ namespace RSA_Kryptering
                 }
             }
         }
-                
+
+        static void convertToChar(string cipherText)
+        {
+            for (int i = 0; i < cipherText.Length / 2; i++)
+            {
+                cipherChars[i] = cipherText.Substring(i*2, 2);
+                Console.WriteLine(cipherChars[i]);
+            }
+            
+        }
+
+
     }
 }
