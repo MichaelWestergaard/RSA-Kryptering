@@ -9,8 +9,6 @@ namespace RSA_Kryptering
 {
     class Program
     {
-        static Random rand = new Random();
-
         static int p;
         static int q;
         static int n;
@@ -18,13 +16,17 @@ namespace RSA_Kryptering
         static int phi;
         static int d;
 
+        //Lav arrays om til lister...
+
         public static string convertedText;
         public static string convertedTextBackwards;
+        public static string decryptedText;
         public static string cipherText;
-        public static string[] cipherChars;
+        public static int[] cipherChars = new int[3];
         public static List<BigInteger> cipherBlocks = new List<BigInteger>();
-        public static string[] convertedTextBlocks = new string[3];
-        public static BigInteger[] convertedTextBackwardsBlocks = new BigInteger[3];
+        public static string[] convertedTextBlocks = new string[2];
+
+        public static char[] chars = "         abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ".ToArray();
 
         static void Main(string[] args)
         {
@@ -33,15 +35,17 @@ namespace RSA_Kryptering
 
             encrypt(clearText);
 
+            decrypt();
+
             Console.WriteLine("N = " + n);
             Console.WriteLine("Phi = " + phi);
             Console.WriteLine("E = " + e);
             Console.WriteLine("d = " + d);
             Console.WriteLine("convertedText = " + convertedText);
             Console.WriteLine("CipherText = " + cipherText);
+            Console.WriteLine("Decrypted Text = " + decryptedText);
             Console.ReadLine();
 
-            decrypt();
             Console.ReadLine();
         }
 
@@ -71,12 +75,12 @@ namespace RSA_Kryptering
             {
                 convertedTextBlocks[i] = convertedText.Substring(i*3,3);
             }
-            convertedTextBlocks[(convertedText.Length/3)] = convertedText.Substring(convertedText.Length-3,3);
+            //convertedTextBlocks[(convertedText.Length/3)] = convertedText.Substring(convertedText.Length-3,3);
             
             for (int i = 0; i < convertedTextBlocks.Length; i++) {
                 BigInteger cipherBlock = BigInteger.Pow(BigInteger.Parse(convertedTextBlocks[i]), e) % n;
 
-                Console.WriteLine(convertedTextBlocks[i] + " = " + cipherBlock);
+                //Console.WriteLine(convertedTextBlocks[i] + " = " + cipherBlock);
                 cipherText += cipherBlock;
                 cipherBlocks.Add(cipherBlock);
             }
@@ -89,7 +93,7 @@ namespace RSA_Kryptering
             {
                 convertedTextBackwards += BigInteger.Pow(item, d) % n;
             }
-            Console.WriteLine(convertedTextBackwards);
+            //Console.WriteLine(convertedTextBackwards);
             convertToChar(convertedTextBackwards);
         }
 
@@ -145,7 +149,6 @@ namespace RSA_Kryptering
         static void convertToInt(string clearText)
         {
             char[] text = clearText.ToArray();
-            char[] chars = "abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ".ToArray();
             for (int i = 0; i < text.Length; i++)
             {
                 int index =  Array.IndexOf(chars, text[i]) + 1;
@@ -163,10 +166,16 @@ namespace RSA_Kryptering
         {
             for (int i = 0; i < cipherText.Length / 2; i++)
             {
-                cipherChars[i] = cipherText.Substring(i*2, 2);
-                Console.WriteLine(cipherChars[i]);
+                int block = Int32.Parse(cipherText.Substring(i * 2, 2));
+                cipherChars[i] = block;
+                //Console.WriteLine(block);
             }
-            
+
+            for(int i = 0; i < cipherChars.Length; i++)
+            {
+                decryptedText += chars[cipherChars[i] - 1];
+            }
+
         }
 
 
